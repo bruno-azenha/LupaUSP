@@ -1,0 +1,1 @@
+web: gunicorn LupaUSP.wsgi --log-file -
