@@ -1,3 +1,8 @@
+from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 
-# Create your views here.
+@login_required
+def current_datetime(request):
+	context = {}
+	return render(request, 'database_admin.html', context)
