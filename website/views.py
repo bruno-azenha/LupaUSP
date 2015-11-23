@@ -41,14 +41,13 @@ def addDataFile(request):
 
 @login_required
 def ConsolidateDataFiles (request):
-	2+3
 
+	# First get all DataFile objects
+	dataFiles = DataFile.objects.all()
 
-"""
-	# First get all DataFile obsjects
-	dataFiles = DataFile.obsjects.all()
 
 	for df in dataFiles:
+		print("Ano: {0}, Mês: {1}".format(df.ano, df.mes))
 
 		# Verifies if df is already active
 		if df.active == True:
@@ -68,7 +67,7 @@ def ConsolidateDataFiles (request):
 
 		first = True;
 		# Opens the data file
-		f = newDataFile.dataFile.file
+		f = df.dataFile.file
 		for line in f:
 			if first: 
 				first = False
@@ -100,6 +99,9 @@ def ConsolidateDataFiles (request):
 
 		f.close()
 
+		df.active = True
+		df.save()
+
 		mesObj.totalGastos = totalGastos
 		mesObj.totalFuncionarios = totalFuncionarios
 		mesObj.save()
@@ -107,6 +109,5 @@ def ConsolidateDataFiles (request):
 		anoObj.totalGastos += totalGastos
 		anoObj.save()
 
-		"""
 
 	

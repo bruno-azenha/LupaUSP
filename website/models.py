@@ -47,7 +47,7 @@ class Mes(models.Model):
 class Funcionario(models.Model):
 	nome = 	models.CharField(max_length=100)
 	unidade = models.CharField(max_length=25)
-	departamento = models.CharField(max_length=100)
+	departamento = models.CharField(max_length=200)
 	jornada = models.CharField(max_length=25)
 	categoria = models.CharField(max_length=25)
 	classe = models.CharField(max_length=25)
@@ -61,8 +61,7 @@ class Funcionario(models.Model):
 
 	mes = models.ForeignKey('Mes')
 
-	class Meta:
-		unique_together = ('nome', 'mes')
+
 
 
 
