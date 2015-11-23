@@ -1,12 +1,29 @@
 <!DOCTYPE html>
 <html>
-<head>
-<meta charset="UTF-8">
-<title>Lupa USP</title>
-</head>
+	<head>
+		<meta charset="utf-8">
+		<title>Minimal Django File Upload Example</title>
+	</head>
 
-<body>
-Greatness incoming
-</body>
+	<body>
+        <!-- List of uploaded dataFiles -->
+        {% if dataFiles %}
+            <ul>
+                {% for dataFile in dataFiles %}
+                    <li><a href="{{ dataFile.dataFile.url }}">{{ dataFile.dataFile.name }}</a></li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No dataFiles.</p>
+        {% endif %}
+
+		<!-- Upload form. Note enctype attribute! -->
+		<form action="{% url "addData" %}" method="post" enctype="multipart/form-data">
+			{% csrf_token %}
+			<p>{{ form }} </p>
+
+			<p><input type="submit" value="Upload"/></p>
+		</form>
+	</body>
 
 </html>
