@@ -135,6 +135,13 @@ def homePage(request):
 		context_instance=RequestContext(request)
 	)
 
+def wealth(request):
+	return render_to_response(
+		'health&wealth.html',
+		{},
+		context_instance=RequestContext(request)
+	)
+
 def getData(request):
 	response = serializers.serialize("json", Periodo.objects.all())
 	return JsonResponse(response, safe=False)

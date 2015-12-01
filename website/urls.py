@@ -6,5 +6,7 @@ urlpatterns = patterns('',
 	url(r'^getData/', getData, name='getData'),
 	url(r'^addData/$', addDataFile, name='addData'),
 	url(r'^addData/Consolidate$', ConsolidateDataFiles, name='consolidateDataFiles'),
+	url(r'^wealth/', wealth, name='wealth'),
+
 )
 

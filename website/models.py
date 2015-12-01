@@ -44,6 +44,7 @@ class Unidade(models.Model):
 	totalFuncionarios = models.IntegerField(default=0)
 	totalGastos = models.DecimalField(max_digits=14, decimal_places=2, default=Decimal('0.00'))
 	periodo = models.ForeignKey('Periodo')
+	campus = models.ForeignKey('Campus')
 
 	class Meta:
 		unique_together = ('unidade', 'periodo')
@@ -75,6 +76,9 @@ class Funcionario(models.Model):
 	unidade = models.ForeignKey('Unidade')
 	funcao = models.ForeignKey('Funcao')
 	periodo = models.ForeignKey('Periodo')
+
+class Campus(models.Model):
+	nome = models.CharField(max_length=100, unique=True)
 
 
 
