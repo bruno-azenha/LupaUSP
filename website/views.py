@@ -2,12 +2,15 @@
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.http import HttpResponseRedirect
+from django.http import JsonResponse
 from django.core.urlresolvers import reverse
 from django.core.files import File
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
+from django.core import serializers
+from decimal import *
 
-from .models import DataFile, Ano, Mes, Funcionario
+from .models import *
 from .forms import DataFileForm
 
 @login_required
@@ -45,24 +48,20 @@ def ConsolidateDataFiles (request):
 	# First get all DataFile objects
 	dataFiles = DataFile.objects.all()
 
-
 	for df in dataFiles:
-		print("Ano: {0}, Mês: {1}".format(df.ano, df.mes))
-
+		
 		# Verifies if df is already active
 		if df.active == True:
 			continue
 
-		# Gets or Creates Year entry
-		(anoObj, created) = Ano.objects.get_or_create(ano=df.ano, defaults={'ano': df.ano})
+		print("Consolidating datafile: Ano: {0}, Mês: {1}".format(df.ano, df.mes))
 
-		# Creates Month entry
-		mesObj = Mes()
-		mesObj.mes = df.mes
-		mesObj.ano = df.ano
-		mesObj.save()
 
-		totalGastos = 0
+		# Creates Período entry
+		periodoObj = Periodo(mes=df.mes, ano=df.ano)
+		periodoObj.save()
+
+		totalGastos = Decimal('0.00')
 		totalFuncionarios = 0
 
 		first = True;
@@ -77,24 +76,45 @@ def ConsolidateDataFiles (request):
 
 			# Sets all attributes according to data file
 			newFuncionario.nome = attributes[0]
-			newFuncionario.unidade = attributes[1]
 			newFuncionario.departamento = attributes[2]
 			newFuncionario.jornada = attributes[3]
 			newFuncionario.categoria = attributes[4]
 			newFuncionario.classe = attributes[5]
 			newFuncionario.ref_ms = attributes[6]
-			newFuncionario.funcao = attributes[7]
 			newFuncionario.funcao_estrutura = attributes[8]
 			newFuncionario.tempo_usp = int(attributes[9])
-			newFuncionario.parcelas_eventuais = float(attributes[10].replace(',', '.'))
-			newFuncionario.salario_bruto = float(attributes[11].replace(',', '.'))
-			newFuncionario.salario_liquido = float(attributes[12].replace(',', '.'))
+			newFuncionario.parcelas_eventuais = Decimal(attributes[10].replace(',', '.'))
+			newFuncionario.salario_bruto = Decimal(attributes[11].replace(',', '.'))
+			newFuncionario.salario_liquido = Decimal(attributes[12].replace(',', '.'))
 
-			totalGastos += float(attributes[10].replace(',', '.')) + float(attributes[11].replace(',', '.'))
+			print("Added {}.".format(attributes[0]))
+
+			# Set unidade
+			try:
+				unidadeObj = Unidade.objects.get(unidade=attributes[1], periodo=periodoObj)
+			except ObjectDoesNotExist:
+				unidadeObj = Unidade(unidade=attributes[1], periodo=periodoObj)
+
+			# Set Funcao
+			try:
+				funcaoObj = Funcao.objects.get(funcao=attributes[7], periodo=periodoObj)
+			except ObjectDoesNotExist:
+				funcaoObj = Funcao(funcao=attributes[7], periodo=periodoObj)
+
+			totalGastos += Decimal(attributes[10].replace(',', '.')) + Decimal(attributes[11].replace(',', '.'))
 			totalFuncionarios += 1
 
-			newFuncionario.mes = mesObj
+			funcaoObj.totalFuncionarios += 1
+			funcaoObj.totalGastos += Decimal(attributes[11].replace(',', '.'))
+			funcaoObj.save()
 
+			unidadeObj.totalFuncionarios += 1
+			unidadeObj.totalGastos += Decimal(attributes[11].replace(',', '.'))
+			unidadeObj.save()
+
+			newFuncionario.unidade = unidadeObj
+			newFuncionario.funcao = funcaoObj
+			newFuncionario.periodo = periodoObj
 			newFuncionario.save()
 
 		f.close()
@@ -102,12 +122,24 @@ def ConsolidateDataFiles (request):
 		df.active = True
 		df.save()
 
-		mesObj.totalGastos = totalGastos
-		mesObj.totalFuncionarios = totalFuncionarios
-		mesObj.save()
+		periodoObj.totalGastos = totalGastos
+		periodoObj.totalFuncionarios = totalFuncionarios
+		periodoObj.save()
 
-		anoObj.totalGastos += totalGastos
-		anoObj.save()
+
+def homePage(request):
+	# Render database_admin page with the documents and the form
+	return render_to_response(
+		'home.html',
+		{},
+		context_instance=RequestContext(request)
+	)
+
+def getData(request):
+	response = serializers.serialize("json", Periodo.objects.all())
+	return JsonResponse(response, safe=False)
+
+
 
 
 	

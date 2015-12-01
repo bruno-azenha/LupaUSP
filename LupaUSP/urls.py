@@ -1,6 +1,5 @@
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
-from website.views import *
 
 urlpatterns = patterns('',
     # Examples:
@@ -8,7 +7,6 @@ urlpatterns = patterns('',
     # url(r'^blog/', include('blog.urls')),
 
     url(r'^admin/', include(admin.site.urls)),
+    url(r'^', include('website.urls')),
 
-    url(r'^addData/$', addDataFile, name='addData'),
-    url(r'^addData/Consolidate$', ConsolidateDataFiles, name='ConsolidateDataFiles'),
 )
